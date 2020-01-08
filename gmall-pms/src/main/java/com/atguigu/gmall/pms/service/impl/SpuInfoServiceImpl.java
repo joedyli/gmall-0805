@@ -117,7 +117,7 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
 
 //        FileInputStream inputStream = new FileInputStream("xxxx");
 
-        int i = 1 / 0;
+//        int i = 1 / 0;
 
     }
 
