@@ -24,6 +24,12 @@ spring:
           uri: lb://ums-service
           predicates:
             - Path=/ums/**
+        - id: index-route
+          uri: lb://index-service
+          predicates:
+            - Path=/api/index/**
+          filters:
+            - RewritePath=/api(?<segment>/?.*), $\{segment}
     nacos:
       discovery:
         server-addr: 127.0.0.1:8848

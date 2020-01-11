@@ -10,6 +10,7 @@ import com.atguigu.gmall.pms.vo.SpuInfoVO;
 import com.atguigu.gmall.sms.vo.SaleVO;
 import io.seata.spring.annotation.GlobalTransactional;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -57,6 +58,9 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
 
     @Autowired
     private SpuInfoDescService descService;
+
+    @Autowired
+    private AmqpTemplate amqpTemplate;
 
     @Override
     public PageVo queryPage(QueryCondition params) {
@@ -119,6 +123,12 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
 
 //        int i = 1 / 0;
 
+        sendMsg(spuId, "insert");
+
+    }
+
+    private void sendMsg(Long spuId, String type) {
+        this.amqpTemplate.convertAndSend("GMALL-PMS-EXCHANGE", "item." + type, spuId);
     }
 
     private void saveSkuAndSales(SpuInfoVO spuInfoVO, Long spuId) {
