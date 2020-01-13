@@ -30,4 +30,36 @@ public class IndexController {
         List<CategoryVO> categoryVOS = indexService.queryCategoriesWithSub(pid);
         return Resp.ok(categoryVOS);
     }
+
+    @GetMapping("test/lock")
+    public Resp<Object> testLock(){
+        this.indexService.testLock();
+        return Resp.ok(null);
+    }
+
+    @GetMapping("test/read")
+    public Resp<String> testRead(){
+        String msg = this.indexService.testRead();
+        return Resp.ok(msg);
+    }
+
+    @GetMapping("test/write")
+    public Resp<String> testWrite(){
+        String msg = this.indexService.testWrite();
+        return Resp.ok(msg);
+    }
+
+    @GetMapping("test/latch")
+    public Resp<String> testLatch() throws InterruptedException {
+        String msg = this.indexService.testLatch();
+        return Resp.ok(msg);
+    }
+
+    @GetMapping("test/countdown")
+    public Resp<String> testCountDown(){
+        String msg = this.indexService.testCountDown();
+        return Resp.ok(msg);
+    }
+
+
 }
