@@ -1,12 +1,14 @@
 package com.atguigu.gmall.pms.controller;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 
 import com.atguigu.core.bean.PageVo;
 import com.atguigu.core.bean.QueryCondition;
 import com.atguigu.core.bean.Resp;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +34,13 @@ import com.atguigu.gmall.pms.service.SkuImagesService;
 public class SkuImagesController {
     @Autowired
     private SkuImagesService skuImagesService;
+
+    @GetMapping("{skuId}")
+    public Resp<List<SkuImagesEntity>> queryImagesBySkuId(@PathVariable("skuId")Long skuId){
+
+        List<SkuImagesEntity> skuImagesEntities = this.skuImagesService.list(new QueryWrapper<SkuImagesEntity>().eq("sku_id", skuId));
+        return Resp.ok(skuImagesEntities);
+    }
 
     /**
      * 列表
