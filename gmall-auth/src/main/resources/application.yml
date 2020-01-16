@@ -1,0 +1,15 @@
+server:
+  port: 8089
+spring:
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+
+jwt:
+  token:
+    pubKeyPath: D:\project-0805\rsa\rsa.pub
+    priKeyPath: D:\project-0805\rsa\rsa.pri
+    secret: sdljfwpr2034ewprLPSE280_#)*#
+    cookieName: gmall-token
+    expireTime: 30
