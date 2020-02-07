@@ -30,6 +30,13 @@ spring:
             - Path=/api/index/**
           filters:
             - RewritePath=/api(?<segment>/?.*), $\{segment}
+        - id: order-route
+          uri: lb://order-service
+          predicates:
+            - Path=/api/order/**
+          filters:
+            - RewritePath=/api(?<segment>/?.*), $\{segment}
+            - Auth
     nacos:
       discovery:
         server-addr: 127.0.0.1:8848

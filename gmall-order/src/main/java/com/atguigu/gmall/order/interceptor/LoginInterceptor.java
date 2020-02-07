@@ -1,9 +1,9 @@
-package com.atguigu.gmall.cart.interceptor;
+package com.atguigu.gmall.order.interceptor;
 
+import com.atguigu.core.bean.UserInfo;
 import com.atguigu.core.utils.CookieUtils;
 import com.atguigu.core.utils.JwtUtils;
-import com.atguigu.gmall.cart.config.JwtProperties;
-import com.atguigu.core.bean.UserInfo;
+import com.atguigu.gmall.order.config.JwtProperties;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -13,7 +13,6 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
-import java.util.UUID;
 
 // 目的获取userId以及userKey
 @Component
@@ -30,22 +29,12 @@ public class LoginInterceptor implements HandlerInterceptor {
 
         UserInfo userInfo = new UserInfo();
         String token = CookieUtils.getCookieValue(request, this.properties.getCookieName());
-        String userKey = CookieUtils.getCookieValue(request, this.properties.getUserKey());
-
-        // 判断userKey是否为空
-        if (StringUtils.isEmpty(userKey)) {
-            // 如果为空制作一个放入cookie中
-            userKey = UUID.randomUUID().toString();
-            CookieUtils.setCookie(request, response, this.properties.getUserKey(), userKey, this.properties.getExpireTime());
-        }
-        userInfo.setUserKey(userKey);
 
         if (StringUtils.isEmpty(token)) {
-            // 把userInfo传递给后续的业务。TODO
-            THREAD_LOCAL.set(userInfo);
-            return true;
+            return false;
         }
 
+        // 存在token信息
         try {
             Map<String, Object> infoFromToken = JwtUtils.getInfoFromToken(token, this.properties.getPublicKey());
             Long id = Long.valueOf(infoFromToken.get("id").toString());
@@ -53,7 +42,7 @@ public class LoginInterceptor implements HandlerInterceptor {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        // 把userInfo传递给后续的业务。TODO
+        // 把userInfo传递给后续的业务。
         THREAD_LOCAL.set(userInfo);
 
         return true;

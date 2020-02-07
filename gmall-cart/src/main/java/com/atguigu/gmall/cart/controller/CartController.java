@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -29,6 +30,32 @@ public class CartController {
     public Resp<List<Cart>> queryCarts(){
         List<Cart> carts = this.cartService.queryCarts();
         return Resp.ok(carts);
+    }
+
+    @PostMapping("update")
+    public Resp<Object> updateNum(@RequestBody Cart cart){
+
+        this.cartService.updateNum(cart);
+        return Resp.ok(null);
+    }
+
+    @PostMapping("check")
+    public Resp<Object> check(@RequestBody Cart cart){
+
+        this.cartService.check(cart);
+        return Resp.ok(null);
+    }
+
+    @PostMapping("delete")
+    public Resp<Object> delete(@RequestParam("skuIds") List<Long> skuIds){
+
+//        this.cartService.delete(skuId);
+        return Resp.ok(null);
+    }
+
+    @GetMapping("{userId}")
+    public List<Cart> queryCheckedCarts(@PathVariable("userId")Long userId){
+        return this.cartService.queryCheckedCarts(userId);
     }
 
 }

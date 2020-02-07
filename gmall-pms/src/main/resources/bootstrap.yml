@@ -8,3 +8,4 @@ spring:
         namespace: debb3e72-85dd-46a2-b90f-a8ac6716dec7
         group: dev
         file-extension: yml
+        ext-config:
