@@ -8,6 +8,7 @@ import java.util.Map;
 import com.atguigu.core.bean.PageVo;
 import com.atguigu.core.bean.QueryCondition;
 import com.atguigu.core.bean.Resp;
+import com.atguigu.gmall.wms.vo.SkuLockVO;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -34,6 +35,14 @@ import com.atguigu.gmall.wms.service.WareSkuService;
 public class WareSkuController {
     @Autowired
     private WareSkuService wareSkuService;
+
+    @PostMapping
+    public Resp<List<SkuLockVO>> checkAndLock(@RequestBody List<SkuLockVO> skuLockVOS){
+
+        List<SkuLockVO> skuLocks = this.wareSkuService.checkAndLock(skuLockVOS);
+        return Resp.ok(skuLocks);
+    }
+
 
     @GetMapping("{skuId}")
     public Resp<List<WareSkuEntity>> queryWareSkuBySkuId(@PathVariable("skuId")Long skuId){
