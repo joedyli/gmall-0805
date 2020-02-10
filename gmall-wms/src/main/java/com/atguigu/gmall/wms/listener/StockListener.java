@@ -30,7 +30,7 @@ public class StockListener {
     @RabbitListener(bindings = @QueueBinding(
             value = @Queue(value = "STOCK-UNLOCK-QUEUE", durable = "true"),
             exchange = @Exchange(value = "ORDER-EXCHANGE", ignoreDeclarationExceptions = "true", type = ExchangeTypes.TOPIC),
-            key = {"stock.unlock"}
+            key = {"stock.unlock", "wms.dead"}
     ))
     public void unlock(String orderToken){
 
@@ -42,6 +42,29 @@ public class StockListener {
         List<SkuLockVO> skuLockVOS = JSON.parseArray(json, SkuLockVO.class);
         skuLockVOS.forEach(skuLockVO -> {
             this.wareSkuDao.unLock(skuLockVO.getWareSkuId(), skuLockVO.getCount());
+            this.redisTemplate.delete(KEY_PREFIX + orderToken);
         });
     }
+
+    @RabbitListener(bindings = @QueueBinding(
+            value = @Queue(value = "STOCK-MINUS-QUEUE", durable = "true"),
+            exchange = @Exchange(value = "ORDER-EXCHANGE", ignoreDeclarationExceptions = "true", type = ExchangeTypes.TOPIC),
+            key = {"stock.minus"}
+    ))
+    public void minus(String orderToken){
+        // 获取锁定库存信息
+        String json = this.redisTemplate.opsForValue().get(KEY_PREFIX + orderToken);
+        if (StringUtils.isEmpty(json)) {
+            return ;
+        }
+        // 反序列化锁定库存信息
+        List<SkuLockVO> skuLockVOS = JSON.parseArray(json, SkuLockVO.class);
+        skuLockVOS.forEach(skuLockVO -> {
+
+            this.wareSkuDao.minus(skuLockVO.getWareSkuId(), skuLockVO.getCount());
+
+            this.redisTemplate.delete(KEY_PREFIX + orderToken);
+        });
+    }
+
 }

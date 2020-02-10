@@ -10,6 +10,7 @@ import com.atguigu.gmall.oms.vo.OrderSubmitVO;
 import com.atguigu.gmall.pms.entity.SkuInfoEntity;
 import com.atguigu.gmall.pms.entity.SpuInfoEntity;
 import com.atguigu.gmall.ums.entity.MemberReceiveAddressEntity;
+import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +39,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
 
     @Autowired
     private GmallPmsClient pmsClient;
+
+    @Autowired
+    private AmqpTemplate amqpTemplate;
 
     @Override
     public PageVo queryPage(QueryCondition params) {
@@ -115,7 +119,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
             }
         }
 
-        int i = 1/0;
+//        int i = 1/0;
+        // 订单创建完成之后，定时关单
+        this.amqpTemplate.convertAndSend("ORDER-EXCHANGE", "order.ttl", orderSubmitVO.getOrderToken());
 
         return orderEntity;
     }

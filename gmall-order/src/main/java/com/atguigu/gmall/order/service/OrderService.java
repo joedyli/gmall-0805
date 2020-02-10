@@ -160,7 +160,7 @@ public class OrderService {
         return orderConfirmVO;
     }
 
-    public void submit(OrderSubmitVO orderSubmitVO) {
+    public OrderEntity submit(OrderSubmitVO orderSubmitVO) {
 
         // 1.校验是否重复提交（是：提示， 否：跳转到支付页面，创建订单）
         // 判断redis中有没有，有-说明是第一次提交，放行并删除redis中的orderToken
@@ -208,17 +208,19 @@ public class OrderService {
             return skuLockVO;
         }).collect(Collectors.toList());
         Resp<List<SkuLockVO>> skuLockResp = this.wmsClient.checkAndLock(skuLockVOS);
+        // 1 释放库存，可能会没有机会执行（原因：锁库存虽然成功，但是响应时出现了网络传输异常）
         List<SkuLockVO> lockVOS = skuLockResp.getData();
         if (!CollectionUtils.isEmpty(lockVOS)) {
             throw new OrderException(JSON.toJSONString(lockVOS));
         }
 
-        // 异常 ： 后续订单无法创建，定时释放库存
-
         // 4.新增订单（订单状态：未付款的状态）
         UserInfo userInfo = LoginInterceptor.getUserInfo();
+        OrderEntity orderEntity = null;
         try {
-            this.omsClient.saveOrder(orderSubmitVO, userInfo.getUserId());
+            Resp<OrderEntity> orderEntityResp = this.omsClient.saveOrder(orderSubmitVO, userInfo.getUserId());
+            orderEntity = orderEntityResp.getData();
+            // 2 如果在这里定时关单，可能订单创建成功，而没有正常响应
         } catch (Exception e) {
             e.printStackTrace();
             // 订单创建异常应该立马释放库存： feign（阻塞）  消息队列（异步）
@@ -237,5 +239,7 @@ public class OrderService {
         } catch (AmqpException e) {
             e.printStackTrace();
         }
+
+        return orderEntity;
     }
 }

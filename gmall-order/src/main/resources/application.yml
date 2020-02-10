@@ -19,3 +19,10 @@ jwt:
     cookieName: gmall-token
     userKey: user-key
     expireTime: 7776000
+alipay:
+  app_id: 2016101200666477
+  notify_url: http://9glldacce2.52http.net/api/order/pay/success # 域名是哲西云提供的域名，路径是订单支付成功回调的路径
+  return_url: http://localhost:2000/pay/success.html
+  sign_type: RSA2
+  charset: utf-8
+  gatewayUrl: https://openapi.alipaydev.com/gateway.do

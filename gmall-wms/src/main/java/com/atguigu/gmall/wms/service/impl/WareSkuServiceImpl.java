@@ -4,12 +4,18 @@ import com.alibaba.fastjson.JSON;
 import com.atguigu.gmall.wms.vo.SkuLockVO;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -34,6 +40,9 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
 
     @Autowired
     private StringRedisTemplate redisTemplate;
+
+    @Autowired
+    private AmqpTemplate template;
 
     private static final String KEY_PREFIX = "wms:stock:";
 
@@ -74,6 +83,9 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
         String orderToken = skuLockVOS.get(0).getOrderToken();
         this.redisTemplate.opsForValue().set(KEY_PREFIX + orderToken, JSON.toJSONString(skuLockVOS));
 
+        // 定时释放库存 定时时间（35min）>关单时间（30min）
+        this.template.convertAndSend("ORDER-EXCHANGE", "wms.ttl", orderToken);
+
         return null;
     }
 
@@ -98,6 +110,13 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
         }
 
         fairLock.unlock();
+    }
+
+    public static void main(String[] args) {
+        ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(3);
+        scheduledExecutorService.scheduleAtFixedRate(() -> {
+            System.out.println("这是一个定时任务：" + new Date());
+        }, 1, 5, TimeUnit.SECONDS);
     }
 
 }

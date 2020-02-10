@@ -30,9 +30,9 @@ public class LoginInterceptor implements HandlerInterceptor {
         UserInfo userInfo = new UserInfo();
         String token = CookieUtils.getCookieValue(request, this.properties.getCookieName());
 
-        if (StringUtils.isEmpty(token)) {
-            return false;
-        }
+//        if (StringUtils.isEmpty(token)) {
+//            return false;
+//        }
 
         // 存在token信息
         try {
